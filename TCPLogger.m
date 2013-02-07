@@ -1,32 +1,54 @@
 //
-//  TCPLogger.m
+//  TCPLogger.h
 //  JukeboxTest2
 //
 //  Created by Lion User on 07/02/2013.
 //  Copyright (c) 2013 __MyCompanyName__. All rights reserved.
 //
+//
+//   Add the following lines to the apps .pch file
+//   (uncommented of course!)
+//
+//   #define NSLog(...) tcpLogg_log(__VA_ARGS__);
+//   void tcpLogg_log(NSString* fmt, ...);
+//
 
-#import "TCPLogger.h"
 
+
+#import <Foundation/Foundation.h>
+#import "GCDAsyncSocket.h"
+
+
+#define NETWORK_CLIENT_TIMEOUT_PERIOD 30 // seconds
+#define NETWORK_LOGGING_TCP_PORT 666
+
+
+
+
+
+
+@interface TCPLogger : NSObject <GCDAsyncSocketDelegate>
+
+
+
+void tcpLogg_log(NSString* fmt, ...);
+
+
+
+
+@property (strong, atomic, readonly) GCDAsyncSocket *clientTcpSocket; 
+@property (strong, atomic, readonly) NSDateFormatter *dateFormat; 
+
+
+
++ (void)tcpLog:(NSString*)fmt :(va_list)args;
+
+
+
+@end
 
 
 static TCPLogger *sharedSingleton = nil;
-
-
-
-void tcpLogg_log(NSString* fmt, ...)
-{
-    if(sharedSingleton == nil)
-    {
-        TCPLogger *logger = [[TCPLogger alloc] init]; 
-        logger = nil; // just to keep the compiler happy (doesn't matter size sharedSingleton is set in the init function)
-    }
-    
-    va_list args;
-    va_start(args, fmt);
-    [TCPLogger tcpLog:fmt :args];
-    va_end(args);
-}
 
 
 @implementation TCPLogger
@@ -175,3 +197,24 @@ shouldTimeoutReadWithTag:(long)tag
 }
 
 @end
+
+
+
+
+void tcpLogg_log(NSString* fmt, ...)
+{
+    if(sharedSingleton == nil)
+    {
+        TCPLogger *logger = [[TCPLogger alloc] init]; 
+        logger = nil; // just to keep the compiler happy (doesn't matter size sharedSingleton is set in the init function)
+    }
+    
+    va_list args;
+    va_start(args, fmt);
+    [TCPLogger tcpLog:fmt :args];
+    va_end(args);
+}
+
+
+
+
